@@ -4,7 +4,10 @@ import { section } from '/components/section.js';
 import { button } from '/components/button.js';
 import { deleteButton } from '/components/deleteButton.js';
 
-import { calculateTimeRemaining } from '/lib/calculateTimeRemaining.js';
+import {
+  calculateTimeRemaining,
+  calculateBreakTimeRemaining,
+} from '/lib/calculateTimeRemaining.js';
 
 import timerRemainingDisplay from '/formatTime.js';
 import * as actions from '/actions.js';
@@ -12,6 +15,7 @@ import * as actions from '/actions.js';
 export const timeRemaining = props => {
   const isPaused = props.timerStartedAt === null;
   const remainingTime = calculateTimeRemaining(props);
+  const remainingBreakTime = calculateBreakTimeRemaining(props); // HACK - remove duplication
   const breakComingUp =
     props.breakTimerStartedAt !== null &&
     props.breakTimerStartedAt -
@@ -44,7 +48,7 @@ export const timeRemaining = props => {
             },
             [
               h(
-                'span',
+                'div',
                 {
                   class: {
                     'text-4xl': true,
@@ -55,10 +59,56 @@ export const timeRemaining = props => {
                     fontFamily: "'Working Sans', sans-serif",
                   },
                 },
-                'Time for a break!',
+                'Break time!',
+              ),
+
+              !props.breakDuration && [
+                h(
+                  button,
+                  {
+                    class: {
+                      'bg-green-600': true,
+                      'text-white': true,
+                    },
+                    onclick: [
+                      actions.StartBreak,
+                      () => ({
+                        breakStartedAt: Date.now(),
+                        breakDuration: props.settings.breakDuration,
+                      }),
+                    ],
+                  },
+                  [
+                    h('i', {
+                      class: {
+                        "fas": true,
+                        'fa-play': true,
+                        'mr-4': true,
+                      },
+                    }),
+                    'Start Break',
+                  ],
+                ),
+              ],
+
+              h(
+                'div',
+                {
+                  class: {
+                    'text-6xl': true,
+                    'font-extrabold': true,
+                    'leading-none': true,
+                    'text-green': true,
+                  },
+                  style: {
+                    fontFamily: "'Working Sans', sans-serif",
+                  },
+                },
+                timerRemainingDisplay(remainingBreakTime),
               ),
             ],
           ),
+
           [
             h(
               button,

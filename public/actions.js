@@ -44,12 +44,15 @@ export const Init = (_, timerId) => ({
   timerStartedAt: null,
   timerDuration: 0,
   breakTimerStartedAt: null,
+  breakStartedAt: null,
+  breakDuration: 0,
   mob: [],
   goals: [],
   settings: {
     mobOrder: 'Navigator,Driver',
     duration: 5 * 60 * 1000,
     breaksEnabled: false,
+    breakTime: 5 * 60 * 1000,
     breakCadence: 45 * 60 * 1000,
   },
   expandedReorderable: null,
@@ -592,6 +595,22 @@ export const FinishBreak = state => [
   effects.FinishBreak({ websocket: state.websocket }),
 ];
 
+// HACK - mostly copypasta
+export const StartBreak = (state, { breakStartedAt, breakDuration }) => [
+  {
+    ...state,
+    breakStartedAt,
+    currentTime: breakStartedAt,
+    breakDuration,
+  },
+  [
+    effects.StartBreak({
+      websocket: state.websocket,
+      breakDuration,
+    }),
+  ],
+];
+
 export const PauseTimer = state => {
   const elapsed = state.currentTime - state.timerStartedAt;
   const timerDuration = Math.max(0, state.timerDuration - elapsed);
@@ -795,6 +814,13 @@ export const UpdateByWebsocketData = (
       return {
         ...state,
         breakTimerStartedAt: state.currentTime,
+      };
+
+    case 'break:start':
+      return {
+        ...state,
+        breakStartedAt: Date.now(),
+        breakDuration: data.breakDuration,
       };
 
     case 'break:finish':

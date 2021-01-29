@@ -34,6 +34,14 @@ export const StartTimer = fx(function StartTimerFX(
   return sendMessage(websocket, 'timer:start', { timerDuration });
 });
 
+// HACK - copypasta
+export const StartBreak = fx(function StartBreakFX(
+  _dispatch,
+  { websocket, breakDuration },
+) {
+  return sendMessage(websocket, 'break:start', { breakDuration });
+});
+
 export const PauseTimer = fx(function StartTimerFX(
   _dispatch,
   { websocket, timerDuration },
